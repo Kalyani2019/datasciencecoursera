@@ -1,0 +1,94 @@
+---
+title: "Prediction Assignment Writeup"
+author: ''
+date: ''
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Prediction Assignment Writeup
+
+```{r}
+#install.packages('randomForest')
+```
+
+Setting seed, loading libraries and dataset
+```{r, include=T, echo=T,results=F, message=F}
+set.seed(123)
+require(data.table);require(ggplot2);require(caret);require(randomForest)
+pmltrain <- read.csv("C:/Users/vvkal/Downloads/pml-training.csv")
+pmltest <- read.csv("C:/Users/vvkal/Downloads/pml-testing.csv")
+```
+
+```{r}
+test_na <-sapply(pmltest, FUN=function(x){
+  length(which(is.na(x)))
+})
+```
+
+#Data exploration 
+```{r}
+inTrain <- createDataPartition(pmltrain$classe, p = 0.7, list=F)
+training <- pmltrain[inTrain,!names(pmltrain) %in% names(test_na[test_na>0])]
+testing <- pmltrain[-inTrain,!names(pmltrain) %in% names(test_na[test_na>0])]
+```
+
+#Controlling the class balance
+```{r}
+prop.table(table(training$classe))
+prop.table(table(testing$classe))
+```
+
+#Checking if the split generates any all-NA features in either split
+```{r}
+table(sapply(training, function(x){
+  all(is.na(x))
+}))
+table(sapply(testing, function(x){
+  all(is.na(x))
+}))
+```
+
+```{r}
+cases <- pmltest$X
+pmltrain$X <- NULL
+pmltest$X <- NULL
+training$X <- NULL
+testing$X <- NULL
+```
+
+#Fitting  gradient boosting model
+```{r}
+fitControl <- trainControl(method="cv", number=2)
+```
+
+```{r}
+fitgbm <- train(classe~., method="gbm", data = training, trControl=fitControl)
+```
+
+#Check accuracy (mean), variability (standard deviation) and sample errors
+
+```{r}
+print("GBM mean, standard deviation, sample errors:")
+
+mean(fitgbm$resample$Accuracy)
+sd(fitgbm$resample$Accuracy)
+1-mean(fitgbm$resample$Accuracy)
+```
+###
+Summary of the results
+
+```{r}
+plot(fitgbm)
+print(fitgbm$bestTune)
+```
+
+```{r}
+preds <- predict(fitgbm, pmltest)
+data.frame(cases, preds)
+cat("Predictions: ", paste(predict(fitgbm, pmltest)))
+```
