@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+author: ''
+date: ''
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(plotly)
+```
+
+
+```{r}
+library(scales)
+p <- ggplot(txhousing, aes(date, median)) + 
+  geom_line(aes(
+    group = city, 
+    text = paste("median:", number(median))
+  ))
+ggplotly(p, tooltip = c("text", "x", "city"))
+```
+
