@@ -1,0 +1,35 @@
+---
+title: "DataProducts- Assignt2"
+author: ""
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Plotting Map
+#Let’s create a locator map like you would when searching for an address on Google Maps.
+
+```{r Leaflet, echo=TRUE}
+#install.packages("dplyr")
+#install.packages("leaflet")
+#install.packages("httpuv")
+
+library(leaflet)
+library(dplyr)
+
+# Insert your latitude and longitude in the code below
+# NOTE: Don't get them reversed otherwise you'll end up in the South Pole.
+
+# Initialize and assign m as the leaflet object
+m <- leaflet() %>%
+# Now add tiles to it
+    addTiles() %>%  
+# Setting the middle of where the map should be and the zoom level
+    setView(lng=-77.030137, lat=38.902986, zoom = 16) %>%
+# Now, add a marker with a popup, 
+    addMarkers(lng=-77.030137, lat=38.902986, popup="<b>Hello</b><br><a href='https://www.washingtonpost.com'>-Me</a>")
+
+m 
+```
